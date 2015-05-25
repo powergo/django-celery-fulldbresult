@@ -2,10 +2,14 @@ import json
 
 from djcelery.backends.database import DatabaseBackend
 
+from django_celery_fulldbresult.models import TaskResultMeta
+
 
 class DatabaseResultBackend(DatabaseBackend):
     """Database backend that stores enough task metadata to retry the task.
     """
+
+    TaskModel = TaskResultMeta
 
     def _store_result(self, task_id, result, status, traceback, request=None):
         if request:
