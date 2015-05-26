@@ -18,9 +18,11 @@ class DatabaseResultBackend(DatabaseBackend):
             kwargs = json.dumps(request.kwargs)
             task = request.task
             expires = request.expires
-            routing_key = request.delivery_info.get("routing_key")
-            exchange = request.delivery_info.get("exchange")
+            delivery_info = request.delivery_info or {}
+            routing_key = delivery_info.get("routing_key")
+            exchange = delivery_info.get("exchange")
             hostname = request.hostname
+            date_submitted = getattr(request, "date_submitted", None)
         else:
             args = []
             kwargs = {}
@@ -29,9 +31,11 @@ class DatabaseResultBackend(DatabaseBackend):
             routing_key = None
             exchange = None
             hostname = None
+            date_submitted = None
         self.TaskModel._default_manager.store_result(
             task_id, result, status,
             traceback=traceback, children=self.current_task_children(request),
             task=task, args=args, kwargs=kwargs, expires=expires,
-            routing_key=routing_key, exchange=exchange, hostname=hostname)
+            routing_key=routing_key, exchange=exchange, hostname=hostname,
+            date_submitted=date_submitted)
         return result

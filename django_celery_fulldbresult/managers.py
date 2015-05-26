@@ -11,7 +11,8 @@ class TaskResultManager(TaskManager):
     def store_result(
             self, task_id, result, status, traceback=None, children=None,
             task=None, args=DEFAULT_ARGS, kwargs=DEFAULT_KWARGS, expires=None,
-            routing_key=None, exchange=None, hostname=None):
+            routing_key=None, exchange=None, hostname=None,
+            date_submitted=None):
         """Store the result and status of a task.
         :param task_id: task id
         :param result: The return value of the task, or an exception
@@ -34,22 +35,29 @@ class TaskResultManager(TaskManager):
         :keyword routing_key: todo
         :keyword exchange: todo
         :keyword hostname: todo
+        :keyword date_submitted: todo
         """
+        defaults = {
+            "status": status,
+            "result": result,
+            "traceback": traceback,
+            "task": task,
+            "args": args,
+            "kwargs": kwargs,
+            "expires": expires,
+            "routing_key": routing_key,
+            "exchange": exchange,
+            "hostname": hostname,
+            "meta": {
+                "children": children
+            }
+        }
+
+        if date_submitted is not None:
+            # Only set date_submitted if not None
+            defaults["date_submitted"] = date_submitted
+
         return self.update_or_create(
             task_id=task_id,
-            defaults={
-                "status": status,
-                "result": result,
-                "traceback": traceback,
-                "task": task,
-                "args": args,
-                "kwargs": kwargs,
-                "expires": expires,
-                "routing_key": routing_key,
-                "exchange": exchange,
-                "hostname": hostname,
-                "meta": {
-                    "children": children
-                }
-            }
+            defaults=defaults
         )
