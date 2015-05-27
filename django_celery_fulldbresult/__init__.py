@@ -11,6 +11,11 @@ if getattr(settings, "DJANGO_CELERY_FULLDBRESULT_TRACK_PUBLISH", False):
     @before_task_publish.connect
     def update_sent_state(sender=None, body=None, exchange=None,
                           routing_key=None, **kwargs):
+        if not getattr(
+                settings, "DJANGO_CELERY_FULLDBRESULT_TRACK_PUBLISH", False):
+            # Check again to support dynamic change of this settings
+            return
+
         task = current_app.tasks.get(sender)
         backend = task.backend if task else current_app.backend
         request = Context()

@@ -41,7 +41,9 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_celery_fulldbresult'
+    'djcelery',
+    'django_celery_fulldbresult',
+    'test_app',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -87,3 +89,27 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
 
 STATIC_URL = '/static/'
+
+CELERY_ALWAYS_EAGER = False
+
+BROKER_BACKEND = 'memory'
+
+BROKER_URL = 'memory://'
+
+CELERY_IGNORE_RESULT = False
+
+CELERY_RESULT_BACKEND =\
+    'django_celery_fulldbresult.result_backends:DatabaseResultBackend'
+
+CELERY_CREATE_MISSING_QUEUES = True
+
+CELERY_TASK_RESULT_EXPIRES = 0
+
+CELERY_TIMEZONE = "America/Montreal"
+
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+
+DJANGO_CELERY_FULLDBRESULT_TRACK_PUBLISH = True
+
