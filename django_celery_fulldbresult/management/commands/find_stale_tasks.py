@@ -55,7 +55,6 @@ class Command(BaseCommand):
             "--terminal-state",
             action="append",
             dest="terminal_states",
-            default=TERMINAL_STATES,
             help="max seconds before a task is stale"),
     )
 
@@ -65,6 +64,8 @@ class Command(BaseCommand):
             microseconds=options["microseconds"], minutes=options["minutes"],
             hours=options["hours"], weeks=options["weeks"])
         acceptable_states = options["terminal_states"]
+        if not acceptable_states:
+            acceptable_states = TERMINAL_STATES
 
         tasks = TaskResultMeta.objects.get_stale_tasks(
             delta, acceptable_states).order_by("date_done")
