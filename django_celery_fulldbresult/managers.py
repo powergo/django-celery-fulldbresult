@@ -1,11 +1,38 @@
+from celery.states import SUCCESS, FAILURE
 from djcelery.managers import TaskManager, transaction_retry
+
+from django.utils.timezone import now
 
 
 DEFAULT_ARGS = "[]"
 DEFAULT_KWARGS = "{}"
+TERMINAL_STATES = (
+    SUCCESS,
+    FAILURE
+)
 
 
 class TaskResultManager(TaskManager):
+
+    def get_stale_tasks(self, max_duration=None, acceptable_states=None):
+        """Selects tasks, which are stale: they were last updated before
+        now-max_duration and they are not in one of the acceptable_states.
+
+        :keyword max_duration: A timedelta. If None, the timedelta is 0.
+        :keyword acceptable_states: A collection of states that are considered
+            terminal. Tasks that are not in an acceptable state are
+            considered stale. Default to (SUCCESS, FAILURE)
+        :rtype: QuerySet
+        """
+        max_date = now()
+        if max_duration:
+            max_date = now() - max_duration
+
+        if not acceptable_states:
+            acceptable_states = TERMINAL_STATES
+
+        return self.filter(date_done__lt=max_date).exclude(
+            status__in=acceptable_states)
 
     @transaction_retry(max_retries=2)
     def store_result(
