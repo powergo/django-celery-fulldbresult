@@ -17,6 +17,12 @@ if getattr(settings, "DJANGO_CELERY_FULLDBRESULT_TRACK_PUBLISH", False):
             return
 
         task = current_app.tasks.get(sender)
+
+        if task.ignore_result or getattr(
+                settings, "CELERY_IGNORE_RESULT", False):
+            # Do not save this task result
+            return
+
         backend = task.backend if task else current_app.backend
         request = Context()
         request.update(**body)
