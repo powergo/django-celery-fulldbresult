@@ -4,7 +4,7 @@ from django_celery_fulldbresult.models import TaskResultMeta
 
 
 class TaskResultMetaAdmin(admin.ModelAdmin):
-    list_display = ("task_id", "task", "date_done", "status")
+    list_display = ("task_id", "task", "date_submitted", "date_done", "status")
     search_fields = ("task_id", "task")
     list_filter = ("status", )
 

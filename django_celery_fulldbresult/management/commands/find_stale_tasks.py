@@ -55,7 +55,7 @@ class Command(BaseCommand):
             "--terminal-state",
             action="append",
             dest="terminal_states",
-            help="max seconds before a task is stale"),
+            help="State considered terminal (non-stale). can be repeated."),
     )
 
     def handle(self, *args, **options):

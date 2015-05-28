@@ -19,11 +19,11 @@ class TaskResultMeta(models.Model):
     task_id = models.CharField(_("task id"), max_length=255, unique=True)
     task = models.CharField(_("task name"), max_length=200)
     args = models.TextField(
-        _("Arguments"), blank=True, default="[]",
+        _("arguments"), blank=True, default="[]",
         help_text=_("JSON encoded positional arguments"),
     )
     kwargs = models.TextField(
-        _("Keyword arguments"), blank=True, default="{}",
+        _("keyword arguments"), blank=True, default="{}",
         help_text=_("JSON encoded keyword arguments"),
     )
     hostname = models.CharField(_('hostname'), max_length=255, blank=True,
