@@ -18,7 +18,7 @@ if getattr(settings, "DJANGO_CELERY_FULLDBRESULT_TRACK_PUBLISH", False):
 
         task = current_app.tasks.get(sender)
 
-        if task.ignore_result or getattr(
+        if getattr(task, "ignore_result", False) or getattr(
                 settings, "CELERY_IGNORE_RESULT", False):
             # Do not save this task result
             return
