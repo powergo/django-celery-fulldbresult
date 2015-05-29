@@ -53,6 +53,9 @@ class ManagerTest(TransactionTestCase):
             len(TaskResultMeta.objects.get_stale_tasks(
                 acceptable_states=[PENDING])))
 
+
+class CommandTest(TransactionTestCase):
+
     def test_find_stale_tasks_command(self):
         # Just make sure that there is no exception
         do_something.delay(param="testing")

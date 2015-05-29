@@ -31,7 +31,7 @@ class TaskResultManager(TaskManager):
         if not acceptable_states:
             acceptable_states = TERMINAL_STATES
 
-        return self.filter(date_done__lt=max_date).exclude(
+        return self.filter(date_done__lte=max_date).exclude(
             status__in=acceptable_states)
 
     @transaction_retry(max_retries=2)
