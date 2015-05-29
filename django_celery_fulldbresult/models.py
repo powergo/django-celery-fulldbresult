@@ -56,6 +56,10 @@ class TaskResultMeta(models.Model):
 
     objects = managers.TaskResultManager()
 
+    @property
+    def result_repr(self):
+        return str(self.result)
+
     class Meta:
         verbose_name = _("task state")
         verbose_name_plural = _("task states")
