@@ -88,7 +88,9 @@ You can also use the ``find_stale_tasks`` Django command:
     Stale tasks:
       2015-05-27 14:17:37.096366+00:00 - cf738350-afe8-44f8-9eac-34721581eb61: email_workers.tasks.send_email
 
-Finally, the task results are automatically added to the Django Admin site:
+Finally, the task results are automatically added to the Django Admin site. You
+can select task results and retry them: this action will send a copy of each
+task to the worker using the routes you have defined.
 
 .. image:: https://raw.githubusercontent.com/resulto-admin/django-celery-fulldbresult/newbackend/admin_screenshot.png
 
