@@ -25,7 +25,7 @@ setup(
     url='https://github.com/result-admin/django-celery-fulldbresult',
 
     # Author details
-    author='Resulto Developpement Web Inc.',
+    author='Resulto Dev Team',
     author_email='dev@resulto.ca',
 
     # Choose your license
