@@ -10,7 +10,8 @@ from djcelery.picklefield import PickledObjectField
 from django_celery_fulldbresult import managers
 
 
-TASK_STATE_CHOICES = zip(states.ALL_STATES, states.ALL_STATES)
+TASK_STATE_CHOICES = sorted(zip(states.ALL_STATES, states.ALL_STATES),
+                            key=lambda t: t[0])
 
 
 @python_2_unicode_compatible
