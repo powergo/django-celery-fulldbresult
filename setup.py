@@ -22,7 +22,7 @@ setup(
     long_description=long_description,
 
     # The project's main homepage.
-    url='https://github.com/result-admin/django-celery-fulldbresult',
+    url='https://github.com/resulto-admin/django-celery-fulldbresult',
 
     # Author details
     author='Resulto Dev Team',
