@@ -23,6 +23,7 @@ class DatabaseResultBackend(DatabaseBackend):
             exchange = delivery_info.get("exchange")
             hostname = request.hostname
             date_submitted = getattr(request, "date_submitted", None)
+            eta = request.eta
         else:
             args = []
             kwargs = {}
@@ -32,10 +33,11 @@ class DatabaseResultBackend(DatabaseBackend):
             exchange = None
             hostname = None
             date_submitted = None
+            eta = None
         self.TaskModel._default_manager.store_result(
             task_id, result, status,
             traceback=traceback, children=self.current_task_children(request),
             task=task, args=args, kwargs=kwargs, expires=expires,
             routing_key=routing_key, exchange=exchange, hostname=hostname,
-            date_submitted=date_submitted)
+            date_submitted=date_submitted, eta=eta)
         return result

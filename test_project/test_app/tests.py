@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import timedelta, datetime, timezone
 import json
 from time import sleep
 
@@ -17,7 +17,9 @@ from test_app.tasks import do_something
 class SignalTest(TransactionTestCase):
 
     def test_parameters(self):
-        do_something.delay(param="testing")
+        a_date = datetime(2080, 1, 1, tzinfo=timezone.utc)
+        do_something.apply_async(
+            kwargs={"param": "testing"}, eta=a_date)
         task = TaskResultMeta.objects.all()[0]
         self.assertEqual(
             "test_app.tasks.do_something",
@@ -29,6 +31,9 @@ class SignalTest(TransactionTestCase):
 
         # Task is never executed because eager = false
         self.assertEqual(PENDING, task.status)
+
+        # Attributes such as eta are preserved
+        self.assertEqual(a_date, task.eta)
 
         kwargs = json.loads(task.kwargs)
         self.assertEqual(kwargs, {"param": "testing"})

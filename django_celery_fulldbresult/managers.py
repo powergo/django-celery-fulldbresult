@@ -39,7 +39,7 @@ class TaskResultManager(TaskManager):
             self, task_id, result, status, traceback=None, children=None,
             task=None, args=DEFAULT_ARGS, kwargs=DEFAULT_KWARGS, expires=None,
             routing_key=None, exchange=None, hostname=None,
-            date_submitted=None):
+            date_submitted=None, eta=None):
         """Store the result and status of a task.
         :param task_id: task id
         :param result: The return value of the task, or an exception
@@ -63,6 +63,7 @@ class TaskResultManager(TaskManager):
         :keyword exchange: todo
         :keyword hostname: todo
         :keyword date_submitted: todo
+        :keyword eta: todo
         """
         defaults = {
             "status": status,
@@ -75,6 +76,7 @@ class TaskResultManager(TaskManager):
             "routing_key": routing_key,
             "exchange": exchange,
             "hostname": hostname,
+            "eta": eta,
             "meta": {
                 "children": children
             }

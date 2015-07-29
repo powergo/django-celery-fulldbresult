@@ -24,7 +24,8 @@ retry_task.short_description = _("Retry Tasks")
 
 
 class TaskResultMetaAdmin(admin.ModelAdmin):
-    list_display = ("task_id", "task", "date_submitted", "date_done", "status")
+    list_display = ("task_id", "task", "date_submitted", "date_done", "status",
+                    "eta")
     search_fields = ("task_id", "task")
     list_filter = ("status", )
     actions = [retry_task, ]
