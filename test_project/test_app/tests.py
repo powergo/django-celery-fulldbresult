@@ -1,4 +1,4 @@
-from datetime import timedelta, datetime, timezone
+from datetime import timedelta, datetime, tzinfo
 import json
 from time import sleep
 
@@ -13,11 +13,26 @@ from test_app.tasks import do_something
 
 # Create your tests here.
 
+ZERO = timedelta(0)
+
+
+class UTC(tzinfo):
+    def utcoffset(self, dt):
+        return ZERO
+
+    def tzname(self, dt):
+        return "UTC"
+
+    def dst(self, dt):
+        return ZERO
+
+utc = UTC()
+
 
 class SignalTest(TransactionTestCase):
 
     def test_parameters(self):
-        a_date = datetime(2080, 1, 1, tzinfo=timezone.utc)
+        a_date = datetime(2080, 1, 1, tzinfo=utc)
         do_something.apply_async(
             kwargs={"param": "testing"}, eta=a_date)
         task = TaskResultMeta.objects.all()[0]
