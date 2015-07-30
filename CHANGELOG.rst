@@ -2,6 +2,12 @@
 Changelog - django-celery-fulldbresult
 ======================================
 
+0.2.0 - July 30th 2015
+----------------------
+
+- Tasks' ETA is now captured in the DB as well and presented in the admin by
+  default.
+
 0.1.1 - July 21st 2015
 ----------------------
 
