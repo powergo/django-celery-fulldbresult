@@ -1,17 +1,64 @@
 from __future__ import absolute_import, unicode_literals
+
+import json
+
+from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+
+try:
+    from django.utils.encoding import force_text
+except ImportError:
+    from django.utils.encoding import force_unicode as force_text  # noqa
+
 
 from celery import states
 
 from djcelery.compat import python_2_unicode_compatible
 from djcelery.picklefield import PickledObjectField
 
+
 from django_celery_fulldbresult import managers
 
 
 TASK_STATE_CHOICES = sorted(zip(states.ALL_STATES, states.ALL_STATES),
                             key=lambda t: t[0])
+
+
+def use_json():
+    """Returns True if django celery db result is configured to save results as
+    JSON.
+    """
+    return getattr(settings, "DJANGO_CELERY_FULLDBRESULT_USE_JSON", False)
+
+
+class PickledOrJSONObjectField(PickledObjectField):
+    pass
+
+    def get_db_prep_value(self, value, **kwargs):
+        if use_json():
+            if value is not None:
+                value = force_text(json.dumps(value))
+        else:
+            value = super(PickledOrJSONObjectField, self).get_db_prep_value(
+                value, **kwargs)
+
+        return value
+
+    def to_python(self, value):
+        if use_json():
+            if value is not None:
+                try:
+                    value = json.loads(value)
+                    return value
+                except Exception:
+                    if isinstance(value, str):
+                        # Badly formatted JSON!
+                        raise
+                    else:
+                        return value
+        else:
+            return super(PickledOrJSONObjectField, self).to_python(value)
 
 
 @python_2_unicode_compatible
@@ -45,7 +92,7 @@ class TaskResultMeta(models.Model):
         _("state"),
         max_length=50, default=states.PENDING, choices=TASK_STATE_CHOICES,
     )
-    result = PickledObjectField(null=True, default=None, editable=False)
+    result = PickledOrJSONObjectField(null=True, default=None, editable=False)
     date_submitted = models.DateTimeField(
         _("submitted at"), null=True, blank=True)
     date_done = models.DateTimeField(_("done at"), auto_now=True)
