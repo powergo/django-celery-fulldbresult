@@ -82,8 +82,9 @@ class ResultTest(TransactionTestCase):
         do_something.apply_async(
             kwargs={"param": "testing"}, eta=a_date)
         task = TaskResultMeta.objects.all()[0]
-        # Fake result
-        result = ("testing", "test")
+        # Fake result with objects that are not serializable by json but that
+        # are serializable by pickle.
+        result = ("testing", "test", a_date)
         task.result = result
         task.save()
 

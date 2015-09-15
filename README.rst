@@ -3,7 +3,7 @@ django-celery-fulldbresult - Collects information about a task and its result
 
 :Authors:
   Resulto Developpement Web Inc.
-:Version: 0.2.0
+:Version: 0.3.0
 
 This projects has two goals:
 
@@ -93,6 +93,24 @@ can select task results and retry them: this action will send a copy of each
 task to the worker using the routes you have defined.
 
 .. image:: https://raw.githubusercontent.com/resulto-admin/django-celery-fulldbresult/newbackend/admin_screenshot.png
+
+
+With JSON storage
+~~~~~~~~~~~~~~~~~
+
+Set this variable in your settings.py file:
+
+::
+
+    DJANGO_CELERY_FULLDBRESULT_USE_JSON = True
+
+This will make sure that results are saved in JSON-compatible string in the
+database. With a database such as PostgreSQL, you can apply JSON operators on
+the result column. You can also apply any text-based operators in the extra
+clause of a Django queryset.
+
+If you use this settings, make sure that the result returned by your tasks is
+JSON-serializable.
 
 License
 -------
