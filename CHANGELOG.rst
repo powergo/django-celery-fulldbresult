@@ -6,6 +6,8 @@ Changelog - django-celery-fulldbresult
 ---------------------------
 
 - Task results can be serialized with JSON instead of pickle.
+- Task name in result was incorrect when celery reported a failure such as
+  hard time limit matched.
 
 0.2.0 - July 30th 2015
 ----------------------

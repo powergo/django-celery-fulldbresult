@@ -33,7 +33,9 @@ def use_json():
 
 
 class PickledOrJSONObjectField(PickledObjectField):
-    pass
+    """Serializes field content using pickle or JSON depending on the
+    DJANGO_CELERY_FULLDBRESULT_USE_JSON.
+    """
 
     def get_db_prep_value(self, value, **kwargs):
         if use_json():
@@ -63,7 +65,9 @@ class PickledOrJSONObjectField(PickledObjectField):
 
 @python_2_unicode_compatible
 class TaskResultMeta(models.Model):
-    """Task result/status."""
+    """Task result/status.
+    """
+
     task_id = models.CharField(_("task id"), max_length=255, unique=True)
     task = models.CharField(_("task name"), max_length=200)
     args = models.TextField(
