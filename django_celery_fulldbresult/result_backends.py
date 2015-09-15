@@ -16,7 +16,12 @@ class DatabaseResultBackend(DatabaseBackend):
             # TODO Use celery json serializer
             args = json.dumps(request.args)
             kwargs = json.dumps(request.kwargs)
-            task = request.task
+            # Sometimes, request.task is an object and not a str, so the right
+            # solution is:
+            # 1. if request.name exists (this is a Request object), use it.
+            # 2. Otherwise, use request.task (this will be a string from the
+            # Context object)
+            task = getattr(request, "name", None) or request.task
             expires = request.expires
             delivery_info = request.delivery_info or {}
             routing_key = delivery_info.get("routing_key")
