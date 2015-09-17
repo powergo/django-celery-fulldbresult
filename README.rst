@@ -109,7 +109,7 @@ database. With a database such as PostgreSQL, you can apply JSON operators on
 the result column. You can also apply any text-based operators in the extra
 clause of a Django queryset.
 
-If you use this settings, make sure that the result returned by your tasks is
+If you use this setting, make sure that the result returned by your task is
 JSON-serializable.
 
 License
