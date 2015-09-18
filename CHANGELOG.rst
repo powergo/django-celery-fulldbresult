@@ -2,6 +2,12 @@
 Changelog - django-celery-fulldbresult
 ======================================
 
+0.4.0 - September 18th 2015
+---------------------------
+
+- Can override djcelery's PeriodicTaskAdmin to enable manual triggering of
+  PeriodicTask items with the Django Admin.
+
 0.3.0 - September 15th 2015
 ---------------------------
 

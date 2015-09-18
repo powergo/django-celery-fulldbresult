@@ -3,7 +3,7 @@ django-celery-fulldbresult - Collects information about a task and its result
 
 :Authors:
   Resulto Developpement Web Inc.
-:Version: 0.3.0
+:Version: 0.4.0
 
 This projects has two goals:
 
@@ -111,6 +111,20 @@ clause of a Django queryset.
 
 If you use this setting, make sure that the result returned by your task is
 JSON-serializable.
+
+
+Manual trigger of PeriodicTask items
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Set this variable in your settings.py file:
+
+::
+
+    DJANGO_CELERY_FULLDBRESULT_OVERRIDE_DJCELERY_ADMIN = True
+
+This will override small parts of the django-celery Admin to enable the
+manual launch of PeriodicTask items.
+
 
 License
 -------
