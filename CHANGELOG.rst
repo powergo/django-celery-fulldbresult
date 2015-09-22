@@ -2,7 +2,12 @@
 Changelog - django-celery-fulldbresult
 ======================================
 
-0.3.0 - September 18th 2015
+0.3.1 - September 22nd 2015
+---------------------------
+
+- Can now force JSON representation even if your task result is not JSON serializable.
+
+0.3.0 - September 22nd 2015
 ---------------------------
 
 - Task results can be serialized with JSON instead of pickle.

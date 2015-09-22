@@ -112,6 +112,23 @@ clause of a Django queryset.
 If you use this setting, make sure that the result returned by your task is
 JSON-serializable.
 
+If some results are not JSON-serializable, you can store their string
+representation by setting this variable in your settings.py file:
+
+::
+
+    DJANGO_CELERY_FULLDBRESULT_FORCE_JSON = True
+
+This will save the following structure:
+
+::
+
+    {
+        "value": str(task_result),
+        "forced_json": True
+    }
+
+
 
 Manual trigger of PeriodicTask items
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -122,6 +122,26 @@ class ResultTest(TransactionTestCase):
                 task.result = result
                 task.save()
 
+    def test_param_result_as_json_unserializable_but_force(self):
+        a_date = datetime(2080, 1, 1, tzinfo=utc)
+
+        with self.settings(
+                DJANGO_CELERY_FULLDBRESULT_USE_JSON=True,
+                DJANGO_CELERY_FULLDBRESULT_FORCE_JSON=True):
+            do_something.apply_async(
+                kwargs={"param": "testing"}, eta=a_date)
+            task = TaskResultMeta.objects.all()[0]
+
+            result = ["testing", "test", a_date]
+            task.result = result
+            task.save()
+
+            # Test pickling/unpickling
+            task = TaskResultMeta.objects.all()[0]
+            self.assertEqual(
+                task.result,
+                {"value": str(result), "forced_json": True})
+
 
 class CommandTest(TransactionTestCase):
 

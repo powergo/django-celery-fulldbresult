@@ -32,6 +32,13 @@ def use_json():
     return getattr(settings, "DJANGO_CELERY_FULLDBRESULT_USE_JSON", False)
 
 
+def force_json():
+    """Returns True if django celery db result is configured to force JSON even
+    if a result is not JSON serializable.
+    """
+    return getattr(settings, "DJANGO_CELERY_FULLDBRESULT_FORCE_JSON", False)
+
+
 class PickledOrJSONObjectField(PickledObjectField):
     """Serializes field content using pickle or JSON depending on the
     DJANGO_CELERY_FULLDBRESULT_USE_JSON.
@@ -40,7 +47,20 @@ class PickledOrJSONObjectField(PickledObjectField):
     def get_db_prep_value(self, value, **kwargs):
         if use_json():
             if value is not None:
-                value = force_text(json.dumps(value))
+                try:
+                    value = force_text(json.dumps(value))
+                except TypeError:
+                    if force_json():
+                        value = force_text(
+                            json.dumps(
+                                {
+                                    "value": str(value),
+                                    "forced_json": True
+                                }
+                            )
+                        )
+                    else:
+                        raise
         else:
             value = super(PickledOrJSONObjectField, self).get_db_prep_value(
                 value, **kwargs)
