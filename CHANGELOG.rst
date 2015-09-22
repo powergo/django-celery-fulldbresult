@@ -2,12 +2,14 @@
 Changelog - django-celery-fulldbresult
 ======================================
 
-0.3.0 - September 15th 2015
+0.3.0 - September 18th 2015
 ---------------------------
 
 - Task results can be serialized with JSON instead of pickle.
 - Task name in result was incorrect when celery reported a failure such as
   hard time limit matched.
+- Can override djcelery's PeriodicTaskAdmin to enable manual triggering of
+  PeriodicTask items with the Django Admin.
 
 0.2.0 - July 30th 2015
 ----------------------

@@ -1,9 +1,12 @@
 import json
 
+from django.conf import settings
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
 
 from celery import current_app
+from djcelery.admin import PeriodicTaskAdmin
+from djcelery.models import PeriodicTask
 
 from django_celery_fulldbresult.models import TaskResultMeta
 
@@ -32,5 +35,22 @@ class TaskResultMetaAdmin(admin.ModelAdmin):
     readonly_fields = ("result_repr", )
 
 
-# Register your models here.
 admin.site.register(TaskResultMeta, TaskResultMetaAdmin)
+
+
+# Option to override PeriodicTaskAdmin
+def trigger_periodic_task(modeladmin, request, queryset):
+    """Admin Site Action for django_celery's PeriodicTask that manually
+    triggers the selected tasks.
+    """
+    retry_task(modeladmin, request, queryset)
+trigger_periodic_task.short_description = _("Trigger Periodic Tasks")
+
+
+class CustomPeriodicTaskAdmin(PeriodicTaskAdmin):
+    actions = [trigger_periodic_task, ]
+
+if getattr(settings, "DJANGO_CELERY_FULLDBRESULT_OVERRIDE_DJCELERY_ADMIN",
+           False):
+    admin.site.unregister(PeriodicTask)
+    admin.site.register(PeriodicTask, CustomPeriodicTaskAdmin)

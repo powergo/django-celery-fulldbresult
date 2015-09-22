@@ -112,6 +112,20 @@ clause of a Django queryset.
 If you use this setting, make sure that the result returned by your task is
 JSON-serializable.
 
+
+Manual trigger of PeriodicTask items
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Set this variable in your settings.py file:
+
+::
+
+    DJANGO_CELERY_FULLDBRESULT_OVERRIDE_DJCELERY_ADMIN = True
+
+This will override small parts of the django-celery Admin to enable the
+manual launch of PeriodicTask items.
+
+
 License
 -------
 
