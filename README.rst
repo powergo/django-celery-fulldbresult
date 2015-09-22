@@ -3,7 +3,7 @@ django-celery-fulldbresult - Collects information about a task and its result
 
 :Authors:
   Resulto Developpement Web Inc.
-:Version: 0.4.0
+:Version: 0.3.0
 
 This projects has two goals:
 
