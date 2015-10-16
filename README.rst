@@ -21,9 +21,71 @@ django-celery-fulldbresult works with Python 2.7 and 3.4. It requires Celery
 Installation
 ------------
 
+Install the library
+~~~~~~~~~~~~~~~~~~~
+
 ::
 
     pip install django-celery-fulldbresult
+
+
+Add the library to your INSTALLED_APPS in your Django Settings
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+::
+
+    INSTALLED_APPS = (
+        'django.contrib.admin',
+        'django.contrib.auth',
+        'django.contrib.contenttypes',
+        'django.contrib.sessions',
+        'django.contrib.messages',
+        'django.contrib.staticfiles',
+        'djcelery',
+        'django_celery_fulldbresult',
+    )
+
+
+Set the following minimal settings
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+::
+
+    # Required, won't work if set to True
+    CELERY_ALWAYS_EAGER = False
+
+    CELERY_IGNORE_RESULT = False
+
+    CELERY_RESULT_BACKEND =\
+        'django_celery_fulldbresult.result_backends:DatabaseResultBackend'
+
+    DJANGO_CELERY_FULLDBRESULT_TRACK_PUBLISH = True
+
+    DJANGO_CELERY_FULLDBRESULT_OVERRIDE_DJCELERY_ADMIN = True
+
+
+If you use a custom AdminSite
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+::
+
+    from djcelery.models import PeriodicTask
+    from django_celery_fulldbresult.admin import (
+        TaskResultMetaAdmin, CustomPeriodicTaskAdmin)
+    from django_celery_fulldbresult.models import TaskResultMeta
+
+
+    class MySite(AdminSite):
+        pass
+
+
+    site = MySite()
+    site.register(TaskResultMeta, TaskResultMetaAdmin)
+    site.register(PeriodicTask, CustomPeriodicTaskAdmin)
+
+Note: if you do not use a custom admin site, the admin sections will be
+automatically registered and you have nothing to do.
+
 
 Usage
 -----
