@@ -69,7 +69,7 @@ class PickledOrJSONObjectField(PickledObjectField):
 
     def to_python(self, value):
         if use_json():
-            if value is not None:
+            if value:
                 try:
                     value = json.loads(value)
                     return value
@@ -79,6 +79,8 @@ class PickledOrJSONObjectField(PickledObjectField):
                         raise
                     else:
                         return value
+            else:
+                return None
         else:
             return super(PickledOrJSONObjectField, self).to_python(value)
 
