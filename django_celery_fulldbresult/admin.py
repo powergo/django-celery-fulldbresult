@@ -49,7 +49,7 @@ trigger_periodic_task.short_description = _("Trigger Periodic Tasks")
 
 class CustomPeriodicTaskAdmin(PeriodicTaskAdmin):
     actions = [trigger_periodic_task, ]
-    list_filter = ("name", )
+    list_filter = ("task", )
 
 
 if getattr(settings, "DJANGO_CELERY_FULLDBRESULT_OVERRIDE_DJCELERY_ADMIN",
