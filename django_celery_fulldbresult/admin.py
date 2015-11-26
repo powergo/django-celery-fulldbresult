@@ -30,7 +30,7 @@ class TaskResultMetaAdmin(admin.ModelAdmin):
     list_display = ("task_id", "task", "date_submitted", "date_done", "status",
                     "eta")
     search_fields = ("task_id", "task")
-    list_filter = ("status", )
+    list_filter = ("status", "task")
     actions = [retry_task, ]
     readonly_fields = ("result_repr", )
 
@@ -49,6 +49,8 @@ trigger_periodic_task.short_description = _("Trigger Periodic Tasks")
 
 class CustomPeriodicTaskAdmin(PeriodicTaskAdmin):
     actions = [trigger_periodic_task, ]
+    list_filter = ("name", )
+
 
 if getattr(settings, "DJANGO_CELERY_FULLDBRESULT_OVERRIDE_DJCELERY_ADMIN",
            False):
