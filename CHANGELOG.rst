@@ -2,6 +2,11 @@
 Changelog - django-celery-fulldbresult
 ======================================
 
+0.4.0 - November 26th 2015
+--------------------------
+
+- Can now filter tasks by name in the Django Admin.
+
 0.3.1 - September 22nd 2015
 ---------------------------
 

@@ -3,7 +3,7 @@ django-celery-fulldbresult - Collects information about a task and its result
 
 :Authors:
   Resulto Developpement Web Inc.
-:Version: 0.3.0
+:Version: 0.4.0
 
 This projects has two goals:
 
@@ -154,7 +154,7 @@ Finally, the task results are automatically added to the Django Admin site. You
 can select task results and retry them: this action will send a copy of each
 task to the worker using the routes you have defined.
 
-.. image:: https://raw.githubusercontent.com/resulto-admin/django-celery-fulldbresult/newbackend/admin_screenshot.png
+.. image:: https://raw.githubusercontent.com/resulto-admin/django-celery-fulldbresult/master/admin_screenshot.png
 
 
 With JSON storage

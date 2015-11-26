@@ -10,3 +10,4 @@
 .idea/
 .tox/
 dist/
+/test_project/db.sqlite3
