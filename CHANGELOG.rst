@@ -2,6 +2,11 @@
 Changelog - django-celery-fulldbresult
 ======================================
 
+0.5.0 - July 28th 2016
+----------------------
+
+- Provide a memory-efficient alternative to a Task's ETA or Countdown.
+
 0.4.1 - November 26th 2015
 --------------------------
 

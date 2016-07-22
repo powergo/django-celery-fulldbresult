@@ -2,7 +2,6 @@ from datetime import timedelta
 
 from django.core.management import BaseCommand
 
-from django_celery_fulldbresult.managers import TERMINAL_STATES
 from django_celery_fulldbresult.models import TaskResultMeta
 
 
@@ -52,24 +51,16 @@ class Command(BaseCommand):
             type=int,
             default=0,
             help="max weeks before a task is stale")
-        parser.add_argument(
-            "--terminal-state",
-            action="append",
-            dest="terminal_states",
-            help="State considered terminal (non-stale). can be repeated.")
 
     def handle(self, *args, **options):
         delta = timedelta(
             days=options["days"], seconds=options["seconds"],
             microseconds=options["microseconds"], minutes=options["minutes"],
             hours=options["hours"], weeks=options["weeks"])
-        acceptable_states = options["terminal_states"]
-        if not acceptable_states:
-            acceptable_states = TERMINAL_STATES
 
-        tasks = TaskResultMeta.objects.get_stale_tasks(
-            delta, acceptable_states).order_by("date_done")
-        print("Stale tasks:")
+        tasks = TaskResultMeta.objects.get_stale_scheduled_tasks(
+            delta)
+        print("Stale scheduled tasks:")
         for task in tasks:
             print("  {0} - {1}: {2}".format(
                 task.date_done, task.task_id, task.task))

@@ -1,13 +1,15 @@
 from datetime import timedelta, datetime, tzinfo
 import json
-from time import sleep
+from uuid import uuid4
 
 from celery.states import PENDING
 
 from django.core.management import call_command
 from django.test import TransactionTestCase
 
-from django_celery_fulldbresult.models import TaskResultMeta
+from django_celery_fulldbresult.models import (
+    TaskResultMeta, SCHEDULED, SCHEDULED_SENT)
+from django_celery_fulldbresult.tasks import send_scheduled_task
 
 from test_app.tasks import do_something
 
@@ -35,7 +37,7 @@ class SignalTest(TransactionTestCase):
         a_date = datetime(2080, 1, 1, tzinfo=utc)
         do_something.apply_async(
             kwargs={"param": "testing"}, eta=a_date)
-        task = TaskResultMeta.objects.all()[0]
+        task = TaskResultMeta.objects.order_by("pk")[0]
         self.assertEqual(
             "test_app.tasks.do_something",
             task.task)
@@ -53,12 +55,98 @@ class SignalTest(TransactionTestCase):
         kwargs = json.loads(task.kwargs)
         self.assertEqual(kwargs, {"param": "testing"})
 
+    def test_parameters_ignore_result(self):
+        with self.settings(CELERY_IGNORE_RESULT=True):
+            a_date = datetime(2080, 1, 1, tzinfo=utc)
+            do_something.apply_async(
+                kwargs={"param": "testing"}, eta=a_date)
+            self.assertEqual(0, TaskResultMeta.objects.count())
+
+    def test_parameters_schedule_eta(self):
+        with self.settings(DJANGO_CELERY_FULLDBRESULT_SCHEDULE_ETA=True):
+            a_date = datetime(2080, 1, 1, tzinfo=utc)
+            do_something.apply_async(
+                kwargs={"param": "testing"}, eta=a_date)
+            task = TaskResultMeta.objects.order_by("pk")[0]
+            self.assertEqual(
+                "test_app.tasks.do_something",
+                task.task)
+
+            # This is new and was never set in previous backend. It is only set
+            # before the task is published.
+            self.assertIsNotNone(task.date_submitted)
+
+            self.assertEqual(SCHEDULED, task.status)
+
+            # Attributes such as eta are preserved
+            self.assertEqual(a_date, task.eta)
+
+            kwargs = json.loads(task.kwargs)
+            self.assertEqual(kwargs, {"param": "testing"})
+
+    def test_parameters_schedule_eta_ignore_result(self):
+        with self.settings(DJANGO_CELERY_FULLDBRESULT_SCHEDULE_ETA=True,
+                           CELERY_IGNORE_RESULT=True):
+            a_date = datetime(2080, 1, 1, tzinfo=utc)
+            do_something.apply_async(
+                kwargs={"param": "testing"}, eta=a_date)
+            task = TaskResultMeta.objects.order_by("pk")[0]
+            self.assertEqual(
+                "test_app.tasks.do_something",
+                task.task)
+
+            # This is new and was never set in previous backend. It is only set
+            # before the task is published.
+            self.assertIsNotNone(task.date_submitted)
+
+            self.assertEqual(SCHEDULED, task.status)
+
+            # Attributes such as eta are preserved
+            self.assertEqual(a_date, task.eta)
+
+            kwargs = json.loads(task.kwargs)
+            self.assertEqual(kwargs, {"param": "testing"})
+
+
+class SchedulingTest(TransactionTestCase):
+
+    def test_parameters_schedule_eta(self):
+        with self.settings(DJANGO_CELERY_FULLDBRESULT_SCHEDULE_ETA=True):
+            a_date = datetime(1990, 1, 1, tzinfo=utc)
+            do_something.apply_async(
+                kwargs={"param": "testing"}, eta=a_date)
+            task = TaskResultMeta.objects.order_by("pk")[0]
+            self.assertEqual(
+                "test_app.tasks.do_something",
+                task.task)
+            self.assertEqual(SCHEDULED, task.status)
+
+            send_scheduled_task()
+
+            task = TaskResultMeta.objects.order_by("pk")[0]
+            new_task = TaskResultMeta.objects.order_by("pk")[1]
+
+            # Old task has been marked as sent
+            self.assertEqual(SCHEDULED_SENT, task.status)
+
+            # Old task has a scheduling id
+            self.assertIsNotNone(task.scheduled_id)
+
+            # New task is pending (sent for execution)
+            self.assertEqual(PENDING, new_task.status)
+
+            # No ETA on the new task
+            self.assertIsNone(new_task.eta)
+
+            # The task is of the new task is in the result of the scheduled
+            # task for traceability.
+            self.assertEqual(task.result["new_task_id"], new_task.task_id)
+
 
 class ManagerTest(TransactionTestCase):
 
     def test_get_stale_tasks(self):
         do_something.delay(param="testing")
-        sleep(0.1)
         # The task we created is PENDING, so stale
         self.assertEqual(
             1, len(TaskResultMeta.objects.get_stale_tasks()))
@@ -72,6 +160,24 @@ class ManagerTest(TransactionTestCase):
             0,
             len(TaskResultMeta.objects.get_stale_tasks(
                 acceptable_states=[PENDING])))
+
+    def test_get_stale_scheduled_tasks(self):
+        with self.settings(DJANGO_CELERY_FULLDBRESULT_SCHEDULE_ETA=True):
+            a_date = datetime(1990, 1, 1, tzinfo=utc)
+            do_something.apply_async(
+                kwargs={"param": "testing"}, eta=a_date)
+            task = TaskResultMeta.objects.order_by("pk")[0]
+            # Mock bad execution
+            task.scheduled_id = uuid4().hex
+            task.save()
+
+            self.assertEqual(
+                1, len(TaskResultMeta.objects.get_stale_scheduled_tasks()))
+
+            self.assertEqual(
+                0,
+                len(TaskResultMeta.objects.get_stale_scheduled_tasks(
+                    timedelta(days=365*100))))
 
 
 class ResultTest(TransactionTestCase):
@@ -148,5 +254,11 @@ class CommandTest(TransactionTestCase):
     def test_find_stale_tasks_command(self):
         # Just make sure that there is no exception
         do_something.delay(param="testing")
-        sleep(0.1)
         call_command("find_stale_tasks", microseconds=1)
+
+    def test_find_stale_scheduled_tasks_command(self):
+        # Just make sure that there is no exception
+        a_date = datetime(1990, 1, 1, tzinfo=utc)
+        do_something.apply_async(
+            kwargs={"param": "testing"}, eta=a_date)
+        call_command("find_stale_scheduled_tasks", microseconds=1)
