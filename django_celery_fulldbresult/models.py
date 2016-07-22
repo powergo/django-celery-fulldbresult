@@ -20,9 +20,13 @@ from djcelery.picklefield import PickledObjectField
 
 from django_celery_fulldbresult import managers
 
+SCHEDULED = "SCHEDULED"
 
-TASK_STATE_CHOICES = sorted(zip(states.ALL_STATES, states.ALL_STATES),
-                            key=lambda t: t[0])
+FULL_RESULTS_ALL_STATES = states.ALL_STATES.union(frozenset([SCHEDULED]))
+
+
+TASK_STATE_CHOICES = sorted(
+    zip(FULL_RESULTS_ALL_STATES, FULL_RESULTS_ALL_STATES), key=lambda t: t[0])
 
 
 def use_json():
@@ -118,6 +122,7 @@ class TaskResultMeta(models.Model):
         _("state"),
         max_length=50, default=states.PENDING, choices=TASK_STATE_CHOICES,
     )
+    scheduled_id = models.UUIDField(null=True, blank=True)
     result = PickledOrJSONObjectField(null=True, default=None, editable=False)
     date_submitted = models.DateTimeField(
         _("submitted at"), null=True, blank=True)
