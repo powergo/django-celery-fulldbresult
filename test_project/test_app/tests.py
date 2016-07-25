@@ -7,7 +7,7 @@ from celery.states import PENDING
 from django.core.management import call_command
 from django.test import TransactionTestCase
 
-from django_celery_fulldbresult.models import TaskResultMeta
+from django_celery_fulldbresult.models import TaskResultMeta, SCHEDULED
 
 from test_app.tasks import do_something
 
@@ -52,6 +52,29 @@ class SignalTest(TransactionTestCase):
 
         kwargs = json.loads(task.kwargs)
         self.assertEqual(kwargs, {"param": "testing"})
+
+    def test_parameters_schedule_eta(self):
+        with self.settings(DJANGO_CELERY_FULLDBRESULT_SCHEDULE_ETA=True):
+            a_date = datetime(2080, 1, 1, tzinfo=utc)
+            do_something.apply_async(
+                kwargs={"param": "testing"}, eta=a_date)
+            task = TaskResultMeta.objects.all()[0]
+            self.assertEqual(
+                "test_app.tasks.do_something",
+                task.task)
+
+            # This is new and was never set in previous backend. It is only set
+            # before the task is published.
+            self.assertIsNotNone(task.date_submitted)
+
+            # Task is never executed because eager = false
+            self.assertEqual(SCHEDULED, task.status)
+
+            # Attributes such as eta are preserved
+            self.assertEqual(a_date, task.eta)
+
+            kwargs = json.loads(task.kwargs)
+            self.assertEqual(kwargs, {"param": "testing"})
 
 
 class ManagerTest(TransactionTestCase):

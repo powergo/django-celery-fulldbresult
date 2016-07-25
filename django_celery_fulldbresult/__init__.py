@@ -24,18 +24,25 @@ def new_apply_async(
 
 Task.apply_async = new_apply_async
 
+schedule_eta = getattr(
+    settings, "DJANGO_CELERY_FULLDBRESULT_SCHEDULE_ETA", False)
 
-# TODO MAY NEED ANOTHER OPTION AND ANOTHER RECEIVER IN CASE SOMEONE WANTS TO
-# ABOLISH ETA BUT NOT TRACK PUBLISH?
-if getattr(settings, "DJANGO_CELERY_FULLDBRESULT_TRACK_PUBLISH", False):
+track_publish = getattr(
+    settings, "DJANGO_CELERY_FULLDBRESULT_TRACK_PUBLISH", False)
+
+if track_publish or schedule_eta:
     @before_task_publish.connect
     def update_sent_state(sender=None, body=None, exchange=None,
                           routing_key=None, **kwargs):
         # App may not be loaded on init
         from django_celery_fulldbresult.models import SCHEDULED
+        schedule_eta = getattr(
+            settings, "DJANGO_CELERY_FULLDBRESULT_SCHEDULE_ETA", False)
 
-        if not getattr(
-                settings, "DJANGO_CELERY_FULLDBRESULT_TRACK_PUBLISH", False):
+        track_publish = getattr(
+            settings, "DJANGO_CELERY_FULLDBRESULT_TRACK_PUBLISH", False)
+
+        if not schedule_eta and not track_publish:
             # Check again to support dynamic change of this settings
             return
 
@@ -55,15 +62,19 @@ if getattr(settings, "DJANGO_CELERY_FULLDBRESULT_TRACK_PUBLISH", False):
             "routing_key": routing_key
         }
 
-        # TODO More complex check: no chord, no group, etc.
-        # print(body)
-        if body.get("eta"):
-            status = SCHEDULED
-        else:
-            status = PENDING
+        save = False
 
-        backend.store_result(body["id"], None, status, traceback=None,
-                             request=request)
+        if schedule_eta and body.get("eta") and not body.get("chord")\
+                and not body.get("taskset"):
+            status = SCHEDULED
+            save = True
+        elif track_publish:
+            status = PENDING
+            save = True
+
+        if save:
+            backend.store_result(
+                body["id"], None, status, traceback=None, request=request)
 
         if status == SCHEDULED:
             raise SchedulingStopPublishing(task_id=body["id"])
