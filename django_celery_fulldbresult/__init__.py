@@ -1,3 +1,5 @@
+from __future__ import absolute_import, unicode_literals
+
 from celery import current_app
 from celery.states import PENDING
 from celery.app.task import Context, Task

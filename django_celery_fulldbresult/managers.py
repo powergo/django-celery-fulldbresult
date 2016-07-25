@@ -1,3 +1,5 @@
+from __future__ import absolute_import, unicode_literals
+
 from celery.states import SUCCESS, FAILURE
 from djcelery.managers import TaskManager, transaction_retry
 
