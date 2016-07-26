@@ -8,7 +8,7 @@ from django_celery_fulldbresult.models import (
     TaskResultMeta, SCHEDULED, SCHEDULED_SENT)
 
 
-@shared_task
+@shared_task(ignore_result=True)
 def send_scheduled_task():
     """Task that sends due scheduled tasks for execution.
 

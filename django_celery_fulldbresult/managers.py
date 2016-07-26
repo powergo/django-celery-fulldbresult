@@ -16,6 +16,21 @@ TERMINAL_STATES = (
 
 class TaskResultManager(TaskManager):
 
+    def get_stale_scheduled_tasks(self, max_duration=None):
+        """Selects scheduled tasks, which are stale: they have an old ETA, they
+        have a scheduled state and a scheduled id, but probably were never sent
+        for execution.
+        """
+        from django_celery_fulldbresult.models import SCHEDULED
+
+        max_date = now()
+        if max_duration:
+            max_date = now() - max_duration
+
+        return self.filter(
+            eta__lte=max_date, status=SCHEDULED,
+            scheduled_id__isnull=False)
+
     def get_stale_tasks(self, max_duration=None, acceptable_states=None):
         """Selects tasks, which are stale: they were last updated before
         now-max_duration and they are not in one of the acceptable_states.

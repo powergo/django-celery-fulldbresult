@@ -1,6 +1,6 @@
 from datetime import timedelta, datetime, tzinfo
 import json
-from time import sleep
+from uuid import uuid4
 
 from celery.states import PENDING
 
@@ -131,6 +131,24 @@ class ManagerTest(TransactionTestCase):
             len(TaskResultMeta.objects.get_stale_tasks(
                 acceptable_states=[PENDING])))
 
+    def test_get_stale_scheduled_tasks(self):
+        with self.settings(DJANGO_CELERY_FULLDBRESULT_SCHEDULE_ETA=True):
+            a_date = datetime(1990, 1, 1, tzinfo=utc)
+            do_something.apply_async(
+                kwargs={"param": "testing"}, eta=a_date)
+            task = TaskResultMeta.objects.order_by("pk")[0]
+            # Mock bad execution
+            task.scheduled_id = uuid4().hex
+            task.save()
+
+            self.assertEqual(
+                1, len(TaskResultMeta.objects.get_stale_scheduled_tasks()))
+
+            self.assertEqual(
+                0,
+                len(TaskResultMeta.objects.get_stale_scheduled_tasks(
+                    timedelta(days=365*100))))
+
 
 class ResultTest(TransactionTestCase):
 
@@ -206,5 +224,11 @@ class CommandTest(TransactionTestCase):
     def test_find_stale_tasks_command(self):
         # Just make sure that there is no exception
         do_something.delay(param="testing")
-        sleep(0.1)
         call_command("find_stale_tasks", microseconds=1)
+
+    def test_find_stale_scheduled_tasks_command(self):
+        # Just make sure that there is no exception
+        a_date = datetime(1990, 1, 1, tzinfo=utc)
+        do_something.apply_async(
+            kwargs={"param": "testing"}, eta=a_date)
+        call_command("find_stale_scheduled_tasks", microseconds=1)
