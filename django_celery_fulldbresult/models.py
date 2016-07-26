@@ -22,7 +22,10 @@ from django_celery_fulldbresult import managers
 
 SCHEDULED = "SCHEDULED"
 
-FULL_RESULTS_ALL_STATES = states.ALL_STATES.union(frozenset([SCHEDULED]))
+SCHEDULED_SENT = "SCHEDULED_SENT"
+
+FULL_RESULTS_ALL_STATES = states.ALL_STATES.union(
+    frozenset([SCHEDULED, SCHEDULED_SENT]))
 
 
 TASK_STATE_CHOICES = sorted(
