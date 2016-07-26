@@ -205,6 +205,95 @@ This will override small parts of the django-celery Admin to enable the
 manual launch of PeriodicTask items.
 
 
+Alternative Celery Scheduling (ETA)
+-----------------------------------
+
+Although Celery allows users to schedule the execution of a task by specifying
+an ETA or a countdown, the implementation has at least one main limitation with
+respect to memory consumption: `all workers try to load all tasks with an ETA,
+potentially leading to a large memory consumption
+<https://github.com/celery/celery/issues/2218>`_.
+
+django-celery-fulldbresult proposes an alternative to regular celery ETA with slightly different
+semantics:
+
+1. When a task is sent with an ETA or a countdown, django-celery-fulldbresult
+   intercepts the task and saves it with a status of `SCHEDULED`.
+
+2. A periodic task checks at a configured interval whether the ETA of a task
+   has expired.
+
+3. Once a task is due, a new task with the same parameters but without an ETA
+   is submitted.
+
+4. The task id of the new task is saved in the result of the original scheduled
+   task and the state of the original scheduled task is set to
+   `SCHEDULED_SENT`.
+
+Configuration
+~~~~~~~~~~~~~
+
+Set this variable in your settings.py file:
+
+::
+
+    DJANGO_CELERY_FULLDBRESULT_SCHEDULE_ETA = True
+
+Then create a periodic task in the Django admin or within your code. For
+example:
+
+- Set the cron to ``*/1`` minute, ``*`` for everything else.
+- The task is "django_celery_fulldbresult.tasks.send_scheduled_task"
+- No other parameters
+
+That's it. When you call a task with an ETA, django-celery-fulldbresult will
+automatically intercept the task. For example:
+
+
+::
+
+    my_task.apply_async(args=[...], kwargs={...}, eta=some_date)
+
+
+
+Semantics
+~~~~~~~~~
+
+The task is guaranteed to:
+
+1. Be sent at most once.
+2. Be sent after the ETA has expired (i.e., not before)
+
+If a crashes occur before a task is fully sent, the state of the scheduled task
+will be `SCHEDULED` and the task will have a non-null UUID `scheduled id`. We
+call these "stale scheduled tasks". It is the user responsibility to manually
+resubmit stale scheduled tasks once the application recovers from the crash.
+
+
+Identifying stale scheduled tasks
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can use the get_stale_scheduled_tasks manager to find stale scheduled
+tasks.
+
+::
+
+    from datetime import timedelta
+    from django_celery_fulldbresult.models import TaskResultMeta
+
+    # Returns a QuerySet
+    stale_tasks = TaskResultMeta.objects.get_stale_scheduled_tasks(timedelta(hours=1))
+
+
+You can also use the ``find_stale_scheduled_tasks`` Django command:
+
+::
+
+    $ python manage.py find_stale_tasks --hours 1
+    Stale scheduled tasks:
+      2015-05-27 14:17:37.096366+00:00 - cf738350-afe8-44f8-9eac-34721581eb61: email_workers.tasks.send_email
+
+
 License
 -------
 
