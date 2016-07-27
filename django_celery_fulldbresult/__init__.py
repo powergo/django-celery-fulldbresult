@@ -36,43 +36,37 @@ if track_publish or schedule_eta:
                           routing_key=None, **kwargs):
         # App may not be loaded on init
         from django_celery_fulldbresult.models import SCHEDULED
+
+        task = current_app.tasks.get(sender)
+        save = False
+        status = None
+
         schedule_eta = getattr(
             settings, "DJANGO_CELERY_FULLDBRESULT_SCHEDULE_ETA", False)
 
         track_publish = getattr(
             settings, "DJANGO_CELERY_FULLDBRESULT_TRACK_PUBLISH", False)
 
-        if not schedule_eta and not track_publish:
-            # Check again to support dynamic change of this settings
-            return
-
-        task = current_app.tasks.get(sender)
-
-        if getattr(task, "ignore_result", False) or getattr(
-                settings, "CELERY_IGNORE_RESULT", False):
-            # Do not save this task result
-            return
-
-        backend = task.backend if task else current_app.backend
-        request = Context()
-        request.update(**body)
-        request.date_submitted = now()
-        request.delivery_info = {
-            "exchange": exchange,
-            "routing_key": routing_key
-        }
-
-        save = False
+        ignore_result = getattr(task, "ignore_result", False) or\
+            getattr(settings, "CELERY_IGNORE_RESULT", False)
 
         if schedule_eta and body.get("eta") and not body.get("chord")\
                 and not body.get("taskset"):
             status = SCHEDULED
             save = True
-        elif track_publish:
+        elif track_publish and not ignore_result:
             status = PENDING
             save = True
 
         if save:
+            backend = task.backend if task else current_app.backend
+            request = Context()
+            request.update(**body)
+            request.date_submitted = now()
+            request.delivery_info = {
+                "exchange": exchange,
+                "routing_key": routing_key
+            }
             backend.store_result(
                 body["id"], None, status, traceback=None, request=request)
 
