@@ -3,19 +3,22 @@ django-celery-fulldbresult - Collects information about a task and its result
 
 :Authors:
   Resulto Developpement Web Inc.
-:Version: 0.4.1
+:Version: 0.5.0
 
-This projects has two goals:
+This project adds many small features about the regular Django DB result
+backend. django-celery-fulldbresult provides three main features:
 
-1. Provide a result backend that can store enough information about a task to retry it
-   if necessary.
-2. Provide a way to identify tasks that are never completed (e.g., if the
-   worker crashes before it can report the result).
+1. A result backend that can store enough information about a task to retry it
+   if necessary;
+2. A memory-efficient alternative to a task's ETA or countdown;
+3. Django commands to identify tasks that are never completed or that are
+   scheduled but never sent (e.g., if the worker crashes before it can report
+   the result or while a scheduled task is being sent to a worker).
 
 Requirements
 ------------
 
-django-celery-fulldbresult works with Python 2.7 and 3.4. It requires Celery
+django-celery-fulldbresult works with Python 2.7 and 3.4+. It requires Celery
 3.1+, django-celery 3.1.16+, and Django 1.7+
 
 Installation
@@ -205,8 +208,8 @@ This will override small parts of the django-celery Admin to enable the
 manual launch of PeriodicTask items.
 
 
-Alternative Celery Scheduling (ETA)
------------------------------------
+Alternative Celery Scheduling (ETA and Countdown)
+-------------------------------------------------
 
 Although Celery allows users to schedule the execution of a task by specifying
 an ETA or a countdown, the implementation has at least one main limitation with
@@ -264,7 +267,7 @@ The task is guaranteed to:
 1. Be sent at most once.
 2. Be sent after the ETA has expired (i.e., not before)
 
-If a crashes occur before a task is fully sent, the state of the scheduled task
+If a crash occurs before a task is fully sent, the state of the scheduled task
 will be `SCHEDULED` and the task will have a non-null UUID `scheduled id`. We
 call these "stale scheduled tasks". It is the user responsibility to manually
 resubmit stale scheduled tasks once the application recovers from the crash.

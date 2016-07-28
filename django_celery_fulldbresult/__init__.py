@@ -13,12 +13,12 @@ from django.utils.timezone import now
 old_apply_async = Task.apply_async
 
 
-def new_apply_async(
-        self, *args, **kwargs):
+def new_apply_async(self, *args, **kwargs):
     try:
         return old_apply_async(self, *args, **kwargs)
     except SchedulingStopPublishing as exc:
-        #
+        # There was an ETA and the task was not sent to the broker.
+        # A scheduled task was created instead.
         return self.AsyncResult(exc.task_id)
 
 
