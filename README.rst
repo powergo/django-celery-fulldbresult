@@ -302,3 +302,12 @@ License
 
 This software is licensed under the `New BSD License`. See the `LICENSE` file
 in the repository for the full license text.
+
+
+Signing GPG Key
+---------------
+
+The following GPG keys can be used to sign tags and release files:
+
+- Resulto Development Team: AEC378AB578FF0FC
+- Barthelemy Dagenais: 76320A1B901510C4
