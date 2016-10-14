@@ -1,7 +1,5 @@
 from __future__ import absolute_import, unicode_literals
 
-import json
-
 from django.conf import settings
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
@@ -11,6 +9,7 @@ from djcelery.admin import PeriodicTaskAdmin
 from djcelery.models import PeriodicTask
 
 from django_celery_fulldbresult.models import TaskResultMeta
+from django_celery_fulldbresult import serialization
 
 
 def retry_task(modeladmin, request, queryset):
@@ -19,8 +18,8 @@ def retry_task(modeladmin, request, queryset):
     task_ids = []
     for task in queryset.all():
         task_name = task.task
-        task_args = json.loads(task.args)
-        task_kwargs = json.loads(task.kwargs)
+        task_args = serialization.loads(task.args)
+        task_kwargs = serialization.loads(task.kwargs)
         result = current_app.send_task(
             task_name, args=task_args, kwargs=task_kwargs)
         task_ids.append(result.task_id)

@@ -6,7 +6,6 @@ from django_celery_fulldbresult.models import TaskResultMeta
 
 
 class Command(BaseCommand):
-    option_list = BaseCommand.option_list
 
     def add_arguments(self, parser):
         parser.add_argument(

@@ -1,9 +1,9 @@
-import json
 from uuid import uuid4
 
 from celery import shared_task, current_app
 
 from django.utils.timezone import now
+from django_celery_fulldbresult import serialization
 from django_celery_fulldbresult.models import (
     TaskResultMeta, SCHEDULED, SCHEDULED_SENT)
 
@@ -44,8 +44,8 @@ def send_scheduled_task():
     for task in TaskResultMeta.objects.filter(
             scheduled_id=schedule_id).all():
         task_name = task.task
-        task_args = json.loads(task.args)
-        task_kwargs = json.loads(task.kwargs)
+        task_args = serialization.loads(task.args)
+        task_kwargs = serialization.loads(task.kwargs)
         result = current_app.send_task(
             task_name, args=task_args, kwargs=task_kwargs)
         task.status = SCHEDULED_SENT

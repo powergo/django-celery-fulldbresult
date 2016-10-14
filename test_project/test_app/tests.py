@@ -1,5 +1,4 @@
 from datetime import timedelta, datetime, tzinfo
-import json
 from uuid import uuid4
 
 from celery.states import PENDING
@@ -10,6 +9,7 @@ from django.test import TransactionTestCase
 from django_celery_fulldbresult.models import (
     TaskResultMeta, SCHEDULED, SCHEDULED_SENT)
 from django_celery_fulldbresult.tasks import send_scheduled_task
+from django_celery_fulldbresult import serialization
 
 from test_app.tasks import do_something
 
@@ -52,7 +52,7 @@ class SignalTest(TransactionTestCase):
         # Attributes such as eta are preserved
         self.assertEqual(a_date, task.eta)
 
-        kwargs = json.loads(task.kwargs)
+        kwargs = serialization.loads(task.kwargs)
         self.assertEqual(kwargs, {"param": "testing"})
 
     def test_parameters_ignore_result(self):
@@ -81,7 +81,7 @@ class SignalTest(TransactionTestCase):
             # Attributes such as eta are preserved
             self.assertEqual(a_date, task.eta)
 
-            kwargs = json.loads(task.kwargs)
+            kwargs = serialization.loads(task.kwargs)
             self.assertEqual(kwargs, {"param": "testing"})
 
     def test_parameters_schedule_eta_ignore_result(self):
@@ -104,7 +104,7 @@ class SignalTest(TransactionTestCase):
             # Attributes such as eta are preserved
             self.assertEqual(a_date, task.eta)
 
-            kwargs = json.loads(task.kwargs)
+            kwargs = serialization.loads(task.kwargs)
             self.assertEqual(kwargs, {"param": "testing"})
 
 
