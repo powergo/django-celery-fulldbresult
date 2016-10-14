@@ -1,7 +1,5 @@
 from __future__ import absolute_import, unicode_literals
 
-import json
-
 from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -18,6 +16,7 @@ from djcelery.compat import python_2_unicode_compatible
 from djcelery.picklefield import PickledObjectField
 
 
+from django_celery_fulldbresult import serialization
 from django_celery_fulldbresult import managers
 
 SCHEDULED = "SCHEDULED"
@@ -55,11 +54,11 @@ class PickledOrJSONObjectField(PickledObjectField):
         if use_json():
             if value is not None:
                 try:
-                    value = force_text(json.dumps(value))
+                    value = force_text(serialization.dumps(value))
                 except TypeError:
                     if force_json():
                         value = force_text(
-                            json.dumps(
+                            serialization.dumps(
                                 {
                                     "value": str(value),
                                     "forced_json": True
@@ -78,7 +77,7 @@ class PickledOrJSONObjectField(PickledObjectField):
         if use_json():
             if value:
                 try:
-                    value = json.loads(value)
+                    value = serialization.loads(value)
                     return value
                 except Exception:
                     if isinstance(value, str):

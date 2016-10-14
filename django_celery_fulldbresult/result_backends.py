@@ -1,10 +1,9 @@
 from __future__ import absolute_import, unicode_literals
 
-import json
-
 from djcelery.backends.database import DatabaseBackend
 
 from django_celery_fulldbresult.models import TaskResultMeta
+from django_celery_fulldbresult import serialization
 
 
 class DatabaseResultBackend(DatabaseBackend):
@@ -15,9 +14,8 @@ class DatabaseResultBackend(DatabaseBackend):
 
     def _store_result(self, task_id, result, status, traceback, request=None):
         if request:
-            # TODO Use celery json serializer
-            args = json.dumps(request.args)
-            kwargs = json.dumps(request.kwargs)
+            args = serialization.dumps(request.args)
+            kwargs = serialization.dumps(request.kwargs)
             # Sometimes, request.task is an object and not a str, so the right
             # solution is:
             # 1. if request.name exists (this is a Request object), use it.
