@@ -1,0 +1,9 @@
+django-celery-fulldbresult was originally created in 2015 by Resulto.
+
+Here is an inevitably incomplete list of MUCH-APPRECIATED CONTRIBUTORS --
+people who have submitted patches, reported bugs, and generally made the
+project that much better:
+
+Alexandre Arpin <>
+Barthélémy Dagenais <bart@resulto.ca>
+Martin Gingras <ginmrt@resulto.ca>
