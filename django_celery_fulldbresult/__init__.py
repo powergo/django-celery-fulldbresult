@@ -10,6 +10,15 @@ from django.conf import settings
 from django.utils.timezone import now
 
 
+schedule_eta = getattr(
+    settings, "DJANGO_CELERY_FULLDBRESULT_SCHEDULE_ETA", False)
+
+track_publish = getattr(
+    settings, "DJANGO_CELERY_FULLDBRESULT_TRACK_PUBLISH", False)
+
+monkey_patch_async = getattr(
+    settings, "DJANGO_CELERY_FULLDBRESULT_MONKEY_PATCH_ASYNC", False)
+
 old_apply_async = Task.apply_async
 
 
@@ -22,13 +31,17 @@ def new_apply_async(self, *args, **kwargs):
         return self.AsyncResult(exc.task_id)
 
 
-Task.apply_async = new_apply_async
+def apply_async_monkey_patch():
+    Task.apply_async = new_apply_async
 
-schedule_eta = getattr(
-    settings, "DJANGO_CELERY_FULLDBRESULT_SCHEDULE_ETA", False)
 
-track_publish = getattr(
-    settings, "DJANGO_CELERY_FULLDBRESULT_TRACK_PUBLISH", False)
+def unapply_async_monkey_patch():
+    Task.apply_async = old_apply_async
+
+
+if monkey_patch_async:
+    apply_async_monkey_patch()
+
 
 if track_publish or schedule_eta:
     @before_task_publish.connect

@@ -6,12 +6,14 @@ from celery.states import PENDING
 from django.core.management import call_command
 from django.test import TransactionTestCase
 
+from django_celery_fulldbresult import (
+    apply_async_monkey_patch, unapply_async_monkey_patch)
 from django_celery_fulldbresult.models import (
     TaskResultMeta, SCHEDULED, SCHEDULED_SENT)
 from django_celery_fulldbresult.tasks import send_scheduled_task
 from django_celery_fulldbresult import serialization
 
-from test_app.tasks import do_something
+from test_app.tasks import do_something, do_something_alt
 
 # Create your tests here.
 
@@ -63,7 +65,10 @@ class SignalTest(TransactionTestCase):
             self.assertEqual(0, TaskResultMeta.objects.count())
 
     def test_parameters_schedule_eta(self):
-        with self.settings(DJANGO_CELERY_FULLDBRESULT_SCHEDULE_ETA=True):
+        with self.settings(
+                DJANGO_CELERY_FULLDBRESULT_SCHEDULE_ETA=True,
+                DJANGO_CELERY_FULLDBRESULT_MONKEY_PATCH_ASYNC=True):
+            apply_async_monkey_patch()
             a_date = datetime(2080, 1, 1, tzinfo=utc)
             do_something.apply_async(
                 kwargs={"param": "testing"}, eta=a_date)
@@ -83,10 +88,13 @@ class SignalTest(TransactionTestCase):
 
             kwargs = serialization.loads(task.kwargs)
             self.assertEqual(kwargs, {"param": "testing"})
+            unapply_async_monkey_patch()
 
     def test_parameters_schedule_eta_ignore_result(self):
         with self.settings(DJANGO_CELERY_FULLDBRESULT_SCHEDULE_ETA=True,
-                           CELERY_IGNORE_RESULT=True):
+                           CELERY_IGNORE_RESULT=True,
+                           DJANGO_CELERY_FULLDBRESULT_MONKEY_PATCH_ASYNC=True):
+            apply_async_monkey_patch()
             a_date = datetime(2080, 1, 1, tzinfo=utc)
             do_something.apply_async(
                 kwargs={"param": "testing"}, eta=a_date)
@@ -106,18 +114,56 @@ class SignalTest(TransactionTestCase):
 
             kwargs = serialization.loads(task.kwargs)
             self.assertEqual(kwargs, {"param": "testing"})
+            unapply_async_monkey_patch()
 
 
 class SchedulingTest(TransactionTestCase):
 
     def test_parameters_schedule_eta(self):
-        with self.settings(DJANGO_CELERY_FULLDBRESULT_SCHEDULE_ETA=True):
+        with self.settings(
+                DJANGO_CELERY_FULLDBRESULT_SCHEDULE_ETA=True,
+                DJANGO_CELERY_FULLDBRESULT_MONKEY_PATCH_ASYNC=True):
+            apply_async_monkey_patch()
             a_date = datetime(1990, 1, 1, tzinfo=utc)
             do_something.apply_async(
                 kwargs={"param": "testing"}, eta=a_date)
             task = TaskResultMeta.objects.order_by("pk")[0]
             self.assertEqual(
                 "test_app.tasks.do_something",
+                task.task)
+            self.assertEqual(SCHEDULED, task.status)
+
+            send_scheduled_task()
+
+            task = TaskResultMeta.objects.order_by("pk")[0]
+            new_task = TaskResultMeta.objects.order_by("pk")[1]
+
+            # Old task has been marked as sent
+            self.assertEqual(SCHEDULED_SENT, task.status)
+
+            # Old task has a scheduling id
+            self.assertIsNotNone(task.scheduled_id)
+
+            # New task is pending (sent for execution)
+            self.assertEqual(PENDING, new_task.status)
+
+            # No ETA on the new task
+            self.assertIsNone(new_task.eta)
+
+            # The task is of the new task is in the result of the scheduled
+            # task for traceability.
+            self.assertEqual(task.result["new_task_id"], new_task.task_id)
+            unapply_async_monkey_patch()
+
+    def test_parameters_schedule_eta_base_task_class(self):
+        with self.settings(
+                DJANGO_CELERY_FULLDBRESULT_SCHEDULE_ETA=True):
+            a_date = datetime(1990, 1, 1, tzinfo=utc)
+            do_something_alt.apply_async(
+                kwargs={"param": "testing"}, eta=a_date)
+            task = TaskResultMeta.objects.order_by("pk")[0]
+            self.assertEqual(
+                "test_app.tasks.do_something_alt",
                 task.task)
             self.assertEqual(SCHEDULED, task.status)
 
@@ -162,7 +208,10 @@ class ManagerTest(TransactionTestCase):
                 acceptable_states=[PENDING])))
 
     def test_get_stale_scheduled_tasks(self):
-        with self.settings(DJANGO_CELERY_FULLDBRESULT_SCHEDULE_ETA=True):
+        with self.settings(
+                DJANGO_CELERY_FULLDBRESULT_SCHEDULE_ETA=True,
+                DJANGO_CELERY_FULLDBRESULT_MONKEY_PATCH_ASYNC=True):
+            apply_async_monkey_patch()
             a_date = datetime(1990, 1, 1, tzinfo=utc)
             do_something.apply_async(
                 kwargs={"param": "testing"}, eta=a_date)
@@ -178,6 +227,7 @@ class ManagerTest(TransactionTestCase):
                 0,
                 len(TaskResultMeta.objects.get_stale_scheduled_tasks(
                     timedelta(days=365*100))))
+            unapply_async_monkey_patch()
 
 
 class ResultTest(TransactionTestCase):

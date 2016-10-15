@@ -1,11 +1,25 @@
 from uuid import uuid4
 
-from celery import shared_task, current_app
+from celery import shared_task, current_app, Task
 
 from django.utils.timezone import now
 from django_celery_fulldbresult import serialization
+from django_celery_fulldbresult.errors import SchedulingStopPublishing
 from django_celery_fulldbresult.models import (
     TaskResultMeta, SCHEDULED, SCHEDULED_SENT)
+
+
+class ScheduledTask(Task):
+
+    abstract = True
+
+    def apply_async(self, *args, **kwargs):
+        try:
+            return super(ScheduledTask, self).apply_async(*args, **kwargs)
+        except SchedulingStopPublishing as exc:
+            # There was an ETA and the task was not sent to the broker.
+            # A scheduled task was created instead.
+            return self.AsyncResult(exc.task_id)
 
 
 @shared_task(ignore_result=True)
