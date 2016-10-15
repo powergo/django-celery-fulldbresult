@@ -3,7 +3,8 @@ from kombu.exceptions import (EncodeError, DecodeError)
 
 
 def dumps(data):
-    """ Serialize data using Kombu serializer, default format is JSON. """
+    """Serializes data using Kombu serializer, default format is JSON.
+    """
     try:
         content_type, encoding, data = k_registry.dumps(data)
     except EncodeError as e:
@@ -12,9 +13,9 @@ def dumps(data):
 
 
 def loads(data, content_type="application/json", encoding="utf-8"):
-    """ Deserialize data using Kombu deserializer, default format is JSON. """
+    """Deserializes data using Kombu deserializer, default format is JSON.
+    """
     try:
         return k_registry.loads(data, content_type, encoding)
     except DecodeError as e:
         raise TypeError(e)
-
