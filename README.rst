@@ -108,16 +108,15 @@ Tasks can be retrieved with the ``TaskResultMeta`` model:
 
 ::
 
-    import json
-
     from testcelery.celery import app as celery_app
 
     from django_celery_fulldbresult.models import TaskResultMeta
+    from django_celery_fulldbresult import serialization
 
     task = TaskResultMeta.objects.all()[0]
     task_name = task.task
-    task_args = json.loads(task.args)
-    task_kwargs = json.loads(task.kwargs)
+    task_args = serialization.loads(task.args)
+    task_kwargs = serialization.loads(task.kwargs)
     celery_app.send_task(task_name, args=task_args, kwargs=task_kwargs)
 
 

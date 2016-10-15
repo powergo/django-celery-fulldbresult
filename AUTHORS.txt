@@ -7,3 +7,4 @@ project that much better:
 Alexandre Arpin <>
 Barthélémy Dagenais <bart@resulto.ca>
 Martin Gingras <ginmrt@resulto.ca>
+Giorgio Salluzzo <giorgio.salluzzo@gmail.com>
