@@ -242,6 +242,9 @@ Set this variable in your settings.py file:
 
     DJANGO_CELERY_FULLDBRESULT_SCHEDULE_ETA = True
 
+    # If you do not want to change your code, set this variable too:
+    DJANGO_CELERY_FULLDBRESULT_MONKEY_PATCH_ASYNC = True
+
 Then create a periodic task in the Django admin or within your code. For
 example:
 
@@ -256,6 +259,24 @@ automatically intercept the task. For example:
 ::
 
     my_task.apply_async(args=[...], kwargs={...}, eta=some_date)
+
+
+Using a Base Task
+~~~~~~~~~~~~~~~~~
+
+When ``DJANGO_CELERY_FULLDBRESULT_MONKEY_PATCH_ASYNC`` is set to True, the
+Task.apply_async is monkey patched to correctly handle scheduled tasks.
+
+This will usually work if you correctly use the ``@shared_task`` or
+``@app.task`` decorators. It will probably fail if you use the legacy ``@task``
+decorator though.
+
+If you encounter any problem with the monkey patching, simply set
+``DJANGO_CELERY_FULLDBRESULT_MONKEY_PATCH_ASYNC`` to False and instead, use a
+base task:
+
+
+::
 
 
 
