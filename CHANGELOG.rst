@@ -2,6 +2,13 @@
 Changelog - django-celery-fulldbresult
 ======================================
 
+0.5.1 - October 17th 2016
+-------------------------
+
+- Use Kombu (celery) JSON serialization instead of Python serialization.
+- No longer automatically monkey patch apply_async: requires a setting and can
+  be replaced by using a base task class.
+
 0.5.0 - July 28th 2016
 ----------------------
 
