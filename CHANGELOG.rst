@@ -2,6 +2,11 @@
 Changelog - django-celery-fulldbresult
 ======================================
 
+0.5.2 - November 7th 2016
+-------------------------
+
+- Changes default admin options of PeriodicTask.
+
 0.5.1 - October 17th 2016
 -------------------------
 
