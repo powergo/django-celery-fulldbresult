@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 from django.conf import settings
 from django.db import models
+from django.template.defaultfilters import truncatechars
 from django.utils.translation import ugettext_lazy as _
 
 try:
@@ -13,6 +14,7 @@ except ImportError:
 from celery import states
 
 from djcelery.compat import python_2_unicode_compatible
+from djcelery.models import PeriodicTask
 from djcelery.picklefield import PickledObjectField
 
 
@@ -29,6 +31,20 @@ FULL_RESULTS_ALL_STATES = states.ALL_STATES.union(
 
 TASK_STATE_CHOICES = sorted(
     zip(FULL_RESULTS_ALL_STATES, FULL_RESULTS_ALL_STATES), key=lambda t: t[0])
+
+
+@property
+def truncated_args(self):
+    return truncatechars(self.args, 100)
+
+
+@property
+def truncated_kwargs(self):
+    return truncatechars(self.kwargs, 100)
+
+
+PeriodicTask.truncated_kwargs = truncated_kwargs
+PeriodicTask.truncated_args = truncated_args
 
 
 def use_json():
