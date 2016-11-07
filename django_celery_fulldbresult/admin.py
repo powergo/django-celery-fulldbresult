@@ -49,7 +49,7 @@ trigger_periodic_task.short_description = _("Trigger Periodic Tasks")
 
 
 class CustomPeriodicTaskAdmin(PeriodicTaskAdmin):
-    actions = [trigger_periodic_task, ]
+    actions = PeriodicTaskAdmin.actions + [trigger_periodic_task]
     # XXX djcelery places the enabled flag first, which makes it a icon link.
     # This is ugly and hurts usability so we changed the list display order.
     list_display = ("__unicode__", "enabled", "task", "args", "kwargs")
