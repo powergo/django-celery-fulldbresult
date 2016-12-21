@@ -256,7 +256,7 @@ class ResultTest(TransactionTestCase):
                 kwargs={"param": "testing"}, eta=a_date)
             task = TaskResultMeta.objects.all()[0]
             # Fake result as str.
-            result = "\nbob\n"
+            result = '\n"bo""b\n'
             task.result = result
             task.save()
 

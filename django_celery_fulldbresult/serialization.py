@@ -6,6 +6,7 @@ def dumps(data):
     """Serializes data using Kombu serializer.
     """
     try:
+        # dumps will convert any strings into json-compatible strings.
         content_type, encoding, data = k_registry.dumps(
             data, serializer="json")
     except EncodeError as e:

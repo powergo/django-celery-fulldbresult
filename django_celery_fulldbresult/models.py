@@ -10,6 +10,11 @@ try:
 except ImportError:
     from django.utils.encoding import force_unicode as force_text  # noqa
 
+try:
+    StringType = basestring
+except NameError:
+    StringType = str
+
 
 from celery import states
 
@@ -96,7 +101,7 @@ class PickledOrJSONObjectField(PickledObjectField):
                     value = serialization.loads(value)
                     return value
                 except Exception:
-                    if isinstance(value, str):
+                    if isinstance(value, StringType):
                         # Badly formatted JSON!
                         raise
                     else:
