@@ -2,7 +2,7 @@
 Changelog - django-celery-fulldbresult
 ======================================
 
-0.5.3 - December 21st 2016
+0.5.3 - December 22nd 2016
 --------------------------
 
 - Fixed regression bug: bad plain string conversion to JSON
