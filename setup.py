@@ -68,9 +68,9 @@ setup(
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
-        'Django>=1.7',
-        'celery>=3.1',
-        'django_celery>=3.1.16'
+        'Django>=1.8,<2.0',
+        'celery>=3.1.15,<4.0',
+        'django_celery>=3.1.17'
     ],
 
     # List additional groups of dependencies here (e.g. development
