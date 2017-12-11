@@ -117,8 +117,8 @@ class TaskResultMeta(models.Model):
     """Task result/status.
     """
 
-    task_id = models.CharField(_("task id"), max_length=255, unique=True)
-    task = models.CharField(_("task name"), max_length=200)
+    task_id = models.CharField(_("task id"), max_length=191, unique=True)
+    task = models.CharField(_("task name"), max_length=191)
     args = models.TextField(
         _("arguments"), blank=True, default="[]",
         help_text=_("JSON encoded positional arguments"),
@@ -127,13 +127,13 @@ class TaskResultMeta(models.Model):
         _("keyword arguments"), blank=True, default="{}",
         help_text=_("JSON encoded keyword arguments"),
     )
-    hostname = models.CharField(_('hostname'), max_length=255, blank=True,
+    hostname = models.CharField(_('hostname'), max_length=191, blank=True,
                                 null=True)
     exchange = models.CharField(
-        _('exchange'), max_length=200, blank=True, null=True, default=None,
+        _('exchange'), max_length=191, blank=True, null=True, default=None,
     )
     routing_key = models.CharField(
-        _('routing key'), max_length=200, blank=True, null=True, default=None,
+        _('routing key'), max_length=191, blank=True, null=True, default=None,
     )
     eta = models.DateTimeField(
         _('eta'), blank=True, null=True,
