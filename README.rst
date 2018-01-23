@@ -18,8 +18,8 @@ backend. django-celery-fulldbresult provides three main features:
 Requirements
 ------------
 
-django-celery-fulldbresult works with Python 2.7 and 3.4+. It requires Celery
-3.1+, django-celery 3.1.16+, and Django 1.7+
+django-celery-fulldbresult works with Python 2.7 and 3.4+. It requires at least Celery
+3.1.15, django-celery 3.1.17, and Django 1.8. Python 2 support is dropped as of Django 2.0.
 
 Installation
 ------------
